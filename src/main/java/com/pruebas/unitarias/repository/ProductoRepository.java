@@ -10,11 +10,7 @@ import com.pruebas.unitarias.entity.Producto;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
-    List<Producto> findByActivoTrue();
     List<Producto> findByForma(String forma);
     List<Producto> findByTamanio(String tamanio);
-    
-    @Query("SELECT p FROM Producto p WHERE p.activo = true AND p.stock > 0")
-    List<Producto> findProductosDisponibles();
     
 }
