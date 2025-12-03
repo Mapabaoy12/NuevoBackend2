@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pruebas.unitarias.dto.CrearUsuarioRequest;
+import com.pruebas.unitarias.dto.LoginRequest;
+import com.pruebas.unitarias.dto.LoginResponse;
 import com.pruebas.unitarias.dto.UsuarioResponse;
 import com.pruebas.unitarias.entity.Usuario;
 import com.pruebas.unitarias.repository.UsuarioRepository;
@@ -20,7 +22,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
-    
+    public static final String admin_email = "matias@administrador.cl";
+    public static final String admin_password = "admin1234";
     private final UsuarioRepository usuarioRepository;
 
     @Transactional(readOnly = true)
@@ -36,6 +39,30 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + email));
         return convertirAResponse(usuario);
+    }
+    @Transactional(readOnly = true)
+    public LoginResponse Login(LoginRequest request) {
+        if (admin_email.equalsIgnoreCase((request.getEmail()))){
+            if (admin_password.equals(request.getPassword())) {
+                UsuarioResponse adminResponse = new UsuarioResponse();
+                adminResponse.setNombre("Administrador");
+                adminResponse.setEmail(admin_email);
+                return LoginResponse.exitoso(adminResponse, true);
+                
+            }else{
+                return LoginResponse.fallido("password incorrecta");
+                
+            }
+        }
+        Usuario usuario = usuarioRepository.findByEmail(request.getEmail()).orElse(null);
+        if (usuario == null){
+            return LoginResponse.fallido("Usuario no encontrado");
+        }
+        if (!request.getPassword().equals(usuario.getPassword())) {
+            return LoginResponse.fallido("Password incorrecta");
+            
+        }
+        return LoginResponse.exitoso(convertirAResponse(usuario), false);
     }
     
     @Transactional
@@ -155,6 +182,7 @@ public class UsuarioService {
         response.setId(usuario.getId());
         response.setNombre(usuario.getNombre());
         response.setEmail(usuario.getEmail());
+        response.setPassword(usuario.getPassword());
         response.setTelefono(usuario.getTelefono());
         response.setFechaNacimiento(usuario.getFechaNacimiento().toString());
         response.setDireccion(usuario.getDireccion());

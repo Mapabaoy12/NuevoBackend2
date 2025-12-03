@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pruebas.unitarias.dto.CrearUsuarioRequest;
+import com.pruebas.unitarias.dto.LoginRequest;
+import com.pruebas.unitarias.dto.LoginResponse;
 import com.pruebas.unitarias.dto.UsuarioResponse;
 import com.pruebas.unitarias.service.UsuarioService;
 
@@ -89,5 +91,15 @@ public class UsuarioController {
     public ResponseEntity<Boolean> existe(@PathVariable String email) {
         boolean existe = usuarioService.existePorEmail(email);
         return ResponseEntity.ok(existe);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){ 
+        LoginResponse response = usuarioService.Login(request);
+        if(response.isSuccess()){
+            return ResponseEntity.ok(response);
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
     }
 }
